@@ -1,0 +1,36 @@
+{
+  "arm_step": "source/IRB14050_SAYuMi_-_rev00.STEP",
+  "links": ["base", "Link1_R", "Link2_R", "Link3_R", "Link4_R", "Link5_R", "Link6_R", "Link7_R"],
+  "node_names": ["base", "link1", "link2", "link3", "link4", "link5", "link6", "link7"],
+  "joint_names": ["axis1", "axis2", "axis7", "axis3", "axis4", "axis5", "axis6"],
+  "simplify_ratio": 0.35,
+  "palette": {
+    "default":        { "name": "yumi_body",   "color": [0.86, 0.87, 0.87], "roughness": 0.42 },
+    "0.58,0.60,0.58": { "name": "yumi_body",   "color": [0.86, 0.87, 0.87], "roughness": 0.42 },
+    "0.58,0.60,0.72": { "name": "yumi_body",   "color": [0.86, 0.87, 0.87], "roughness": 0.42 },
+    "0.07,0.09,0.10": { "name": "yumi_dark",   "color": [0.13, 0.14, 0.15], "roughness": 0.55 },
+    "0.08,0.10,0.10": { "name": "yumi_dark",   "color": [0.13, 0.14, 0.15], "roughness": 0.55 },
+    "0.21,0.21,0.21": { "name": "yumi_metal",  "color": [0.32, 0.33, 0.35], "roughness": 0.35, "metallic": 0.6 },
+    "0.59,0.64,0.85": { "name": "yumi_accent", "color": [0.62, 0.68, 0.78], "roughness": 0.4 },
+    "1.00,0.00,1.00": { "name": "abb_red",     "color": [1.0, 0.0, 0.06],   "roughness": 0.35 }
+  },
+  "tool": {
+    "flange_point_mm": [341.541, 464.114, 1.0],
+    "rotation": [[0, 0, 1], [0, 1, 0], [-1, 0, 0]],
+    "tcp_z_mm": 136.0,
+    "palette": {
+      "body":   { "name": "gripper_body",   "color": [0.84, 0.85, 0.86], "roughness": 0.45 },
+      "finger": { "name": "gripper_finger", "color": [0.16, 0.17, 0.18], "roughness": 0.5, "metallic": 0.3 },
+      "cup":    { "name": "gripper_cup",    "color": [0.08, 0.08, 0.09], "roughness": 0.7 }
+    },
+    "pieces": [
+      { "file": "source/gripper/IRB14000_GRIPPER_rev00_BASE.STEP",         "node": "gripper",   "material": "body" },
+      { "file": "source/gripper/IRB14000_GRIPPER_rev00_Tool2_Cup.STEP",    "node": "gripper",   "material": "cup" },
+      { "file": "source/gripper/IRB14000_GRIPPER_rev00_Tool3_Cup.STEP",    "node": "gripper",   "material": "cup" },
+      { "file": "source/gripper/IRB14000_GRIPPER_rev00_Link1_Slide.STEP",  "node": "finger_l",  "material": "body" },
+      { "file": "source/gripper/IRB14000_GRIPPER_rev00_Tool1_Finger1.STEP","node": "finger_l",  "material": "finger" },
+      { "file": "source/gripper/IRB14000_GRIPPER_rev00_Link2_Slide.STEP",  "node": "finger_r",  "material": "body" },
+      { "file": "source/gripper/IRB14000_GRIPPER_rev00_Tool1_Finger2.STEP","node": "finger_r",  "material": "finger" }
+    ]
+  }
+}

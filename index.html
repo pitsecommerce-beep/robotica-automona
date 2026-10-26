@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Robótica Autónoma · Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark"></span>
+        <div>
+          <div class="brand-title">Robótica Autónoma</div>
+          <div class="brand-sub">Laboratorio de simulación</div>
+        </div>
+      </div>
+      <div class="topbar-center">
+        <label class="field">
+          <span>Robot</span>
+          <select id="robot-select"></select>
+        </label>
+        <label class="field">
+          <span>Escenario</span>
+          <select id="scenario-select">
+            <option value="lab">Celda vacía</option>
+            <option value="sorting" disabled>Clasificación en línea (próximamente)</option>
+            <option value="pallet" disabled>Despaletizado (próximamente)</option>
+          </select>
+        </label>
+      </div>
+      <div class="status" id="status"><span class="dot"></span><span id="status-text">Cargando…</span></div>
+    </header>
+
+    <main class="layout">
+      <section class="viewport" id="viewport">
+        <div class="overlay-tl" id="robot-card"></div>
+        <div class="overlay-bl">
+          <button class="chip" id="toggle-axes">Ejes</button>
+          <button class="chip" id="reset-view">Vista</button>
+        </div>
+        <div class="loading" id="loading">Cargando modelo CAD…</div>
+      </section>
+
+      <aside class="panel">
+        <div class="panel-section">
+          <div class="btn-row">
+            <button class="btn primary" id="btn-home">Ir a Home</button>
+            <button class="btn" id="btn-zero">Ejes a 0</button>
+            <button class="btn" id="btn-demo">Demo</button>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-head">
+            <h2>Movimiento manual</h2>
+            <span class="tag">Articular</span>
+          </div>
+          <div id="joints"></div>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-head"><h2>Velocidad</h2><span class="mono" id="override-val">100 %</span></div>
+          <input type="range" id="override" min="5" max="100" value="100" />
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-head"><h2>Pinza</h2><span class="mono" id="grip-val">0 mm</span></div>
+          <div class="btn-row">
+            <button class="btn" id="grip-open">Abrir</button>
+            <button class="btn" id="grip-close">Cerrar</button>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-head"><h2>TCP</h2><span class="tag">Base · mm</span></div>
+          <div class="tcp" id="tcp"></div>
+        </div>
+
+        <div class="panel-section voice">
+          <div class="panel-head"><h2>Órdenes por voz</h2><span class="tag muted">Paso 4</span></div>
+          <button class="btn mic" disabled>● Mantener para hablar</button>
+          <p class="hint">Transcripción con Whisper y planificación con Claude.</p>
+        </div>
+      </aside>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

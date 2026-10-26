@@ -1,0 +1,147 @@
+{
+  "source": "IRB14050_SAYuMi_-_rev00.STEP",
+  "units": "m",
+  "up": "Y",
+  "joints": [
+    {
+      "name": "axis1",
+      "parent": "base",
+      "child": "link1",
+      "origin": [
+        0.0,
+        0.134,
+        -0.0
+      ],
+      "axis": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "name": "axis2",
+      "parent": "link1",
+      "child": "link2",
+      "origin": [
+        -0.03,
+        0.305832,
+        0.0
+      ],
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "name": "axis7",
+      "parent": "link2",
+      "child": "link3",
+      "origin": [
+        0.0,
+        0.134,
+        -0.001
+      ],
+      "axis": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "name": "axis3",
+      "parent": "link3",
+      "child": "link4",
+      "origin": [
+        0.0405,
+        0.557758,
+        0.0
+      ],
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "name": "axis4",
+      "parent": "link4",
+      "child": "link5",
+      "origin": [
+        0.0,
+        0.598114,
+        0.001
+      ],
+      "axis": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "axis5",
+      "parent": "link5",
+      "child": "link6",
+      "origin": [
+        0.305514,
+        0.571008,
+        0.0
+      ],
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "name": "axis6",
+      "parent": "link6",
+      "child": "link7",
+      "origin": [
+        0.0,
+        0.598114,
+        0.001
+      ],
+      "axis": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "tool": {
+    "flange_origin": [
+      0.341541,
+      0.598114,
+      0.001
+    ],
+    "tcp": [
+      0.477541,
+      0.598114,
+      0.001
+    ],
+    "approach_axis": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "finger_axis": [
+      0.0,
+      1.0,
+      0.0
+    ]
+  },
+  "triangles": {
+    "base": 31275,
+    "link1": 7310,
+    "link2": 14676,
+    "link3": 8048,
+    "link4": 12599,
+    "link5": 6712,
+    "link6": 6725,
+    "link7": 3610,
+    "gripper": 23964,
+    "finger_l": 6764,
+    "finger_r": 6772
+  }
+}

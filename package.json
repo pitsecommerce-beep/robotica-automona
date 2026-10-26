@@ -1,0 +1,23 @@
+{
+  "name": "robotica-autonoma",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Simulador de robótica autónoma con robots ABB, física realista y control por voz",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "node server/index.js",
+    "preview": "npm run build && npm start"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.11"
+  }
+}

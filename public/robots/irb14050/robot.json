@@ -1,0 +1,42 @@
+{
+  "id": "irb14050",
+  "name": "ABB YuMi IRB 14050",
+  "family": "YuMi",
+  "description": "Brazo colaborativo de 7 ejes (single-arm YuMi)",
+  "source": "Datasheet IRB 14050 (ABB, 2021-03-31) y CAD IRB14050_SAYuMi rev00",
+  "model": "model.glb",
+  "kinematics": "kinematics.json",
+  "specs": {
+    "reach_m": 0.559,
+    "payload_kg": 0.5,
+    "robot_mass_kg": 9.5,
+    "axes": 7,
+    "max_tcp_velocity_mps": 1.5,
+    "max_tcp_acceleration_mps2": 39.1,
+    "estop_tcp_acceleration_mps2": 85.4,
+    "accel_time_0_1_s": 0.12,
+    "pose_repeatability_mm": 0.02,
+    "footprint_mm": [160, 160],
+    "mounting": "Cualquier ángulo",
+    "controller": "OmniCore C30",
+    "air_supply_bar": 4
+  },
+  "joints": {
+    "axis1": { "label": "Eje 1 · rotación", "min_deg": -168.5, "max_deg": 168.5, "max_speed_dps": 180 },
+    "axis2": { "label": "Eje 2 · brazo",    "min_deg": -143.5, "max_deg": 43.5,  "max_speed_dps": 180 },
+    "axis7": { "label": "Eje 7 · rotación", "min_deg": -168.5, "max_deg": 168.5, "max_speed_dps": 180 },
+    "axis3": { "label": "Eje 3 · brazo",    "min_deg": -123.5, "max_deg": 80.0,  "max_speed_dps": 180 },
+    "axis4": { "label": "Eje 4 · muñeca",   "min_deg": -290.0, "max_deg": 290.0, "max_speed_dps": 400 },
+    "axis5": { "label": "Eje 5 · flexión",  "min_deg": -88.0,  "max_deg": 138.0, "max_speed_dps": 400 },
+    "axis6": { "label": "Eje 6 · giro",     "min_deg": -229.0, "max_deg": 229.0, "max_speed_dps": 400 }
+  },
+  "calibration_note": "El cero de cada eje es la pose del CAD (brazo vertical, antebrazo horizontal). Sentido positivo según la regla de la mano derecha sobre el eje detectado. Pendiente de validar contra RobotStudio.",
+  "gripper": {
+    "name": "YuMi Smart Gripper (servo + 2 ventosas)",
+    "finger_stroke_m": 0.025,
+    "max_grip_force_n": 20,
+    "finger_speed_mps": 0.025,
+    "vacuum": true
+  },
+  "home_deg": { "axis1": 0, "axis2": -30, "axis7": 0, "axis3": -40, "axis4": 0, "axis5": 70, "axis6": 0 }
+}
