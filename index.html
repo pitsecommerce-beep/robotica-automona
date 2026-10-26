@@ -40,6 +40,8 @@
         <div class="overlay-bl">
           <button class="chip" id="toggle-axes">Ejes</button>
           <button class="chip" id="reset-view">Vista</button>
+          <button class="chip" id="click-mode">Ir a clic</button>
+          <button class="chip" id="btn-stop">Parar</button>
         </div>
         <div class="loading" id="loading">Cargando modelo CAD…</div>
       </section>
@@ -59,6 +61,48 @@
             <span class="tag">Articular</span>
           </div>
           <div id="joints"></div>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-head">
+            <h2>Movimiento cartesiano</h2>
+            <span class="tag">Base · mm</span>
+          </div>
+          <div class="cart-grid">
+            <label>X<input id="cart-x" type="number" step="1" /></label>
+            <label>Y<input id="cart-y" type="number" step="1" /></label>
+            <label>Z<input id="cart-z" type="number" step="1" /></label>
+            <label>Giro °<input id="cart-yaw" type="number" step="5" value="0" /></label>
+          </div>
+          <div class="cart-opts">
+            <select id="cart-orient">
+              <option value="down">Pinza hacia abajo</option>
+              <option value="keep">Mantener orientación</option>
+            </select>
+            <select id="cart-speed" title="Velocidad del TCP en MoveL">
+              <option value="100">v100</option>
+              <option value="250" selected>v250</option>
+              <option value="500">v500</option>
+              <option value="1000">v1000</option>
+              <option value="1500">v1500</option>
+            </select>
+          </div>
+          <div class="btn-row">
+            <button class="btn" id="cart-read">Leer TCP</button>
+            <button class="btn" id="cart-movej">MoveJ</button>
+            <button class="btn" id="cart-movel">MoveL</button>
+          </div>
+          <div class="jog">
+            <button class="btn" data-jog="-x">−X</button><button class="btn" data-jog="+x">+X</button>
+            <button class="btn" data-jog="-y">−Y</button><button class="btn" data-jog="+y">+Y</button>
+            <button class="btn" data-jog="-z">−Z</button><button class="btn" data-jog="+z">+Z</button>
+            <select id="jog-step" title="Paso del jog">
+              <option value="1">1 mm</option>
+              <option value="10" selected>10 mm</option>
+              <option value="50">50 mm</option>
+            </select>
+          </div>
+          <p class="hint">Activa «Ir a clic» y haz clic sobre la mesa para que el robot se aproxime al punto.</p>
         </div>
 
         <div class="panel-section">
@@ -82,7 +126,7 @@
         <div class="panel-section voice">
           <div class="panel-head"><h2>Órdenes por voz</h2><span class="tag muted">Paso 4</span></div>
           <button class="btn mic" disabled>● Mantener para hablar</button>
-          <p class="hint">Transcripción con Whisper y planificación con Claude.</p>
+          <p class="hint">Conversación con Deepgram (voz) y Claude (razonamiento). Sin claves configuradas, el robot responde con pitidos.</p>
         </div>
       </aside>
     </main>

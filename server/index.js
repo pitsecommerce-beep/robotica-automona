@@ -13,7 +13,7 @@ app.get('/api/health', (_req, res) => {
     ok: true,
     services: {
       claude: Boolean(process.env.ANTHROPIC_API_KEY),
-      whisper: Boolean(process.env.OPENAI_API_KEY),
+      deepgram: Boolean(process.env.DEEPGRAM_API_KEY),
     },
   });
 });

@@ -47,6 +47,8 @@ button, select, input { font: inherit; }
 .status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
 .status.ready .dot { background: var(--ok); }
 .status.busy .dot { background: #f2a900; }
+.status.error .dot { background: var(--red); }
+.status.error { color: var(--red); }
 
 .layout { flex: 1; display: flex; min-height: 0; }
 .viewport { position: relative; flex: 1; min-width: 0; }
@@ -127,3 +129,17 @@ input[type='range'] { width: 100%; accent-color: var(--red); }
   .viewport { height: 60vh; flex: none; }
   .panel { width: 100%; border-left: none; }
 }
+
+.cart-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 8px; }
+.cart-grid label { font-size: 10px; color: var(--muted); display: flex; flex-direction: column; gap: 2px; }
+.cart-grid input, .cart-opts select, .jog select {
+  width: 100%; min-width: 0;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 5px 6px; background: var(--bg);
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+}
+.cart-opts { display: grid; grid-template-columns: 2fr 1fr; gap: 6px; margin-bottom: 8px; }
+.cart-opts select { font-family: inherit; }
+.jog { display: grid; grid-template-columns: repeat(6, 1fr) 1.4fr; gap: 4px; margin-top: 8px; }
+.jog .btn { padding: 6px 0; font-size: 12px; }
+.jog select { font-family: inherit; }

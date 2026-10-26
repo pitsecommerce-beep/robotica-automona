@@ -7,9 +7,9 @@ Simulador web de robótica autónoma con robots ABB modelados desde su CAD ofici
 | Paso | Contenido | Estado |
 |---|---|---|
 | 1 | CAD → GLB, laboratorio 3D, robot articulado con límites reales | Hecho |
-| 2 | Cinemática inversa y trayectorias cartesianas | Pendiente |
+| 2 | Cinemática inversa (7 ejes), MoveJ/MoveL y jog cartesiano | Hecho |
 | 3 | Escenario de clasificación en línea con física (Rapier) | Pendiente |
-| 4 | Voz (Whisper) y cerebro (Claude), conversación y gestos | Pendiente |
+| 4 | Conversación por voz (Deepgram) y cerebro (Claude) con gestos; pitidos si no hay claves | Pendiente |
 | 5 | Escenario de despaletizado y selector de robots | Pendiente |
 
 ## Desarrollo
@@ -18,12 +18,20 @@ Simulador web de robótica autónoma con robots ABB modelados desde su CAD ofici
 npm install
 npm run dev        # Vite en http://localhost:5173
 npm run preview    # build de producción + servidor Express
+npm test           # pruebas de cinemática y trayectorias
 ```
+
+## Movimiento
+
+- **IK:** mínimos cuadrados amortiguados sobre los 7 ejes, con la redundancia usada para mantener una postura cercana a Home y lejos de los topes (`src/robot/Kinematics.js`).
+- **MoveJ:** todos los ejes llegan a la vez con perfil trapezoidal y la velocidad máxima de cada eje.
+- **MoveL:** el TCP sigue una recta a la velocidad pedida (máx. 1,5 m/s). Si algún eje superara su límite, el movimiento se alarga en lugar de saltarse la física.
+- Coordenadas en pantalla en el marco de base ABB: X adelante, Y izquierda, Z arriba, en mm.
 
 ## Despliegue en Railway
 
 Railway usa `railway.json`: compila con Vite y arranca `server/index.js`, que sirve el front y las rutas `/api/*`.
-Variables de entorno (ver `.env.example`): `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`.
+Variables de entorno (ver `.env.example`): `ANTHROPIC_API_KEY`, `DEEPGRAM_API_KEY`. Son opcionales: sin ellas el robot responde con pitidos.
 
 ## Añadir un robot
 

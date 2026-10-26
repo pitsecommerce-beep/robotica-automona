@@ -191,5 +191,5 @@ function buildTable(scene) {
     }
   });
   scene.add(group);
-  return { group, size, height: TABLE_HEIGHT };
+  return { group, size, height: TABLE_HEIGHT, top };
 }

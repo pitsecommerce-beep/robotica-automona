@@ -11,7 +11,8 @@
     "dev": "vite",
     "build": "vite build",
     "start": "node server/index.js",
-    "preview": "npm run build && npm start"
+    "preview": "npm run build && npm start",
+    "test": "node --test test/*.test.js"
   },
   "dependencies": {
     "express": "^4.21.2",
