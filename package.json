@@ -5,7 +5,7 @@
   "description": "Simulador de robótica autónoma con robots ABB, física realista y control por voz",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": "22.x"
   },
   "scripts": {
     "dev": "vite",
