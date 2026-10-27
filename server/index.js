@@ -52,8 +52,9 @@ app.post('/api/brain', express.json({ limit: '256kb' }), async (req, res) => {
   }
 });
 
-// Los GLB no cambian entre despliegues de la misma versión: caché larga.
-app.use('/robots', express.static(path.join(dist, 'robots'), { maxAge: '7d' }));
+// Modelos y cinemática: el navegador revalida siempre (ETag), así un despliegue nuevo nunca
+// mezcla código nuevo con datos viejos. Además el cliente pide cada archivo con ?v=<build>.
+app.use('/robots', express.static(path.join(dist, 'robots'), { maxAge: 0, etag: true }));
 app.use(express.static(dist, { index: false }));
 app.get('*', (_req, res) => res.sendFile(path.join(dist, 'index.html')));
 

@@ -19,9 +19,11 @@ const PATH_DT = 0.01;
 export class Robot {
   static async load(id) {
     const base = `/robots/${id}/`;
-    const spec = await (await fetch(base + 'robot.json')).json();
-    const kin = await (await fetch(base + spec.kinematics)).json();
-    const gltf = await new GLTFLoader().loadAsync(base + spec.model);
+    // Versión del build en la URL: cada despliegue descarga sus propios datos del robot.
+    const v = typeof __BUILD_ID__ !== 'undefined' ? `?v=${__BUILD_ID__}` : '';
+    const spec = await (await fetch(`${base}robot.json${v}`)).json();
+    const kin = await (await fetch(`${base}${spec.kinematics}${v}`)).json();
+    const gltf = await new GLTFLoader().loadAsync(`${base}${spec.model}${v}`);
     return new Robot(spec, kin, gltf.scene);
   }
 
