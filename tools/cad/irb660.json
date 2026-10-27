@@ -1,0 +1,50 @@
+{
+  "up_axis": "Z",
+  "simplify_ratio": 0.5,
+  "part_files": {
+    "base":  ["source/irb660/IRB660_180-315_BASE_CAD_rev02.STEP"],
+    "link1": ["source/irb660/IRB660_180-315_LINK1_CAD_rev02.STEP"],
+    "link2": ["source/irb660/IRB660_180-315_LINK2_CAD_rev02.STEP"],
+    "link3": ["source/irb660/IRB660_180-315_LINK3a_CAD_rev03.STEP"],
+    "link5": ["source/irb660/IRB660_180-315_LINK3b_CAD_rev02.STEP"],
+    "link6": ["source/irb660/IRB660_180-315_LINK6_CAD_rev02.STEP"],
+    "plate": ["source/irb660/IRB660_180-315_LINK_CAD_rev02.STEP"],
+    "rod_h": ["source/irb660/IRB660_180-315_LINK_H_CAD_rev02.STEP"],
+    "rod_v": ["source/irb660/IRB660_180-315_LINK_V_CAD_rev02.STEP"],
+    "crank": ["source/irb660/IRB660_180-315_LINKARM_CAD_rev02.STEP"],
+    "rod3":  ["source/irb660/IRB660_180-315_LINKROD_CAD_rev02.STEP"],
+    "bal_cyl": ["source/irb660/IRB660_180-315_BALANCE_b_CAD_rev02.STEP"],
+    "bal_rod": ["source/irb660/IRB660_180-315_BALANCE_a_CAD_rev02.STEP"]
+  },
+  "actuated": ["axis1", "axis2", "axis3", "axis6"],
+  "mechanism_source": "Robcad irb660_180-315_r02 (.m): ejes, lazos y funciones de acoplamiento",
+  "mechanism": [
+    { "name": "link1", "parent": "base",  "origin_mm": [0, 0, 0],       "axis": [0, 0, 1],  "drive": { "q": { "axis1": 1 } } },
+    { "name": "link2", "parent": "link1", "origin_mm": [300, 0, 800],   "axis": [0, 1, 0],  "drive": { "q": { "axis2": 1 } } },
+    { "name": "link3", "parent": "link2", "origin_mm": [300, 0, 2080],  "axis": [0, 1, 0],  "drive": { "q": { "axis3": 1, "axis2": -1 } } },
+    { "name": "link5", "parent": "link3", "origin_mm": [1650, 0, 2080], "axis": [0, 1, 0],  "drive": { "q": { "axis3": -1 } } },
+    { "name": "link6", "parent": "link5", "origin_mm": [1910, 0, 2080], "axis": [0, 0, -1], "drive": { "q": { "axis6": 1 } } },
+    { "name": "plate", "parent": "link3", "origin_mm": [300, 0, 2080],  "axis": [0, 1, 0],  "drive": { "q": { "axis3": -1 } } },
+    { "name": "rod_h", "parent": "plate", "origin_mm": [644.72, 0, 2369.254], "axis": [0, 1, 0], "drive": { "q": { "axis3": 1 } } },
+    { "name": "rod_v", "parent": "link1", "origin_mm": [-117.233, 0, 968.573], "axis": [0, 1, 0], "drive": { "q": { "axis2": 1 } } },
+    { "name": "crank", "parent": "link2", "origin_mm": [300, 0, 800],   "axis": [0, 1, 0],  "drive": { "q": { "axis3": 1, "axis2": -1 } } },
+    { "name": "rod3",  "parent": "crank", "origin_mm": [-200, 0, 800],  "axis": [0, 1, 0],  "drive": { "q": { "axis2": 1, "axis3": -1 } } },
+    { "name": "bal_cyl", "parent": "link1", "origin_mm": [339.668, 0, 1082.233], "axis": [0, 1, 0],
+      "drive": { "aim": { "target_link": "link2", "target_mm": [300, 0, 2080] } } },
+    { "name": "bal_rod", "parent": "bal_cyl", "type": "prism", "origin_mm": [339.668, 0, 1082.233], "axis": [-39.668, 0, 997.767],
+      "drive": { "stretch": { "of": "bal_cyl" } } }
+  ],
+  "palette": {
+    "default":        { "name": "abb_white",    "color": [0.93, 0.93, 0.92], "roughness": 0.38 },
+    "0.68,0.68,0.68": { "name": "abb_white",    "color": [0.93, 0.93, 0.92], "roughness": 0.38 },
+    "0.07,0.09,0.10": { "name": "abb_graphite", "color": [0.16, 0.17, 0.18], "roughness": 0.5 },
+    "0.22,0.22,0.22": { "name": "abb_metal",    "color": [0.45, 0.46, 0.48], "roughness": 0.3, "metallic": 0.7 },
+    "0.99,0.00,0.00": { "name": "abb_red",      "color": [1.0, 0.0, 0.06],   "roughness": 0.35 }
+  },
+  "tool": {
+    "link": "link6",
+    "tcp_mm": [1910, 0, 1833],
+    "approach": [0, 0, -1],
+    "finger": [0, 1, 0]
+  }
+}

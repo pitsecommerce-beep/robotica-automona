@@ -1,0 +1,119 @@
+{
+  "id": "irb660",
+  "name": "ABB IRB 660-180/3.15",
+  "family": "Paletizador",
+  "description": "Robot paletizador de 4 ejes con paralelogramo; la brida se mantiene siempre horizontal",
+  "source": "Product specification IRB 660 (3HAC081955-001 rev. J), CAD IRB660_180-315 rev03 y mecanismo Robcad rev02",
+  "model": "model.glb",
+  "kinematics": "kinematics.json",
+  "mount": "floor",
+  "specs": {
+    "reach_m": 3.15,
+    "payload_kg": 180,
+    "robot_mass_kg": 1750,
+    "axes": 4,
+    "max_tcp_velocity_mps": 4.0,
+    "max_tcp_acceleration_mps2": 24,
+    "estop_tcp_acceleration_mps2": 37,
+    "accel_time_0_1_s": 0.2,
+    "pose_repeatability_mm": 0.05,
+    "footprint_mm": [
+      1136,
+      790
+    ],
+    "mounting": "Suelo",
+    "controller": "OmniCore V250XT",
+    "max_tcp_velocity_note": "La especificación no publica velocidad máxima del TCP; 4 m/s es un límite del simulador. Las velocidades por eje sí son del datasheet."
+  },
+  "joints": {
+    "axis1": {
+      "label": "Eje 1 · rotación",
+      "min_deg": -180,
+      "max_deg": 180,
+      "max_speed_dps": 130
+    },
+    "axis2": {
+      "label": "Eje 2 · brazo",
+      "min_deg": -42,
+      "max_deg": 85,
+      "max_speed_dps": 130
+    },
+    "axis3": {
+      "label": "Eje 3 · brazo",
+      "min_deg": -20,
+      "max_deg": 120,
+      "max_speed_dps": 130
+    },
+    "axis6": {
+      "label": "Eje 6 · giro",
+      "min_deg": -300,
+      "max_deg": 300,
+      "max_speed_dps": 300
+    }
+  },
+  "coupled_limits": [
+    {
+      "joints": [
+        "axis2",
+        "axis3"
+      ],
+      "note": "Área de trabajo combinada de los ejes 2 y 3 (posiciones 1-6 del diagrama de alcance)",
+      "polygon_deg": [
+        [
+          -42,
+          -20
+        ],
+        [
+          -42,
+          28
+        ],
+        [
+          50,
+          120
+        ],
+        [
+          85,
+          120
+        ],
+        [
+          85,
+          15
+        ],
+        [
+          50,
+          -20
+        ]
+      ]
+    }
+  ],
+  "calibration_note": "Convenciones del controlador ABB validadas con la tabla de posiciones del centro de muñeca de la especificación: el eje 3 es absoluto (no depende del eje 2).",
+  "gripper": null,
+  "home_deg": {
+    "axis1": 0,
+    "axis2": 0,
+    "axis3": 10,
+    "axis6": 0
+  },
+  "view": {
+    "camera": [
+      5.2,
+      3.6,
+      4.6
+    ],
+    "target": [
+      0.8,
+      1.2,
+      0
+    ],
+    "axis_helper_m": 0.35
+  },
+  "gestures": {
+    "axes": {
+      "yaw": "axis1",
+      "lift": "axis2",
+      "pitch": "axis3",
+      "roll": "axis6"
+    },
+    "scale": 0.6
+  }
+}

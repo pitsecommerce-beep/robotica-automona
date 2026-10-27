@@ -28,7 +28,7 @@ export function createLab(container) {
   controls.enableDamping = true;
   controls.maxPolarAngle = Math.PI * 0.495;
   controls.minDistance = 0.3;
-  controls.maxDistance = 6;
+  controls.maxDistance = 16;
 
   // Luces: cenital de estudio con sombras + relleno suave.
   scene.add(new THREE.HemisphereLight(0xffffff, 0x9da3aa, 0.45));
@@ -47,6 +47,16 @@ export function createLab(container) {
   buildFloor(scene);
   buildWalls(scene);
   const table = buildTable(scene);
+  let tape = buildTape(scene, { x: 2.6, z: 2.2 });
+  /** Ajusta la celda (cinta y sombras) al tamaño del robot. */
+  const setCell = (x, z) => {
+    tape.removeFromParent();
+    tape = buildTape(scene, { x, z });
+    const r = Math.max(x, z) * 0.7;
+    Object.assign(key.shadow.camera, { left: -r, right: r, top: r, bottom: -r, far: 40 });
+    key.position.set(r * 1.2, r * 2.2, r);
+    key.shadow.camera.updateProjectionMatrix();
+  };
 
   const resize = () => {
     const { clientWidth: w, clientHeight: h } = container;
@@ -57,7 +67,7 @@ export function createLab(container) {
   new ResizeObserver(resize).observe(container);
   resize();
 
-  return { renderer, scene, camera, controls, table };
+  return { renderer, scene, camera, controls, table, setCell };
 }
 
 function buildFloor(scene) {
@@ -72,30 +82,32 @@ function buildFloor(scene) {
   const grid = new THREE.GridHelper(12, 24, 0xaeb3b8, 0xbec2c6);
   grid.position.y = 0.001;
   scene.add(grid);
+}
 
-  // Cinta de seguridad amarilla/negra delimitando la celda.
+/** Cinta de seguridad amarilla/negra delimitando la celda (se rehace al cambiar de robot). */
+function buildTape(scene, cell) {
+  const group = new THREE.Group();
   const tape = stripeTexture();
-  const mat = new THREE.MeshStandardMaterial({ map: tape, roughness: 0.6 });
   const w = 0.06;
-  const cell = { x: 2.6, z: 2.2 };
   const pieces = [
-    [cell.x, w, 0, cell.z / 2],
-    [cell.x, w, 0, -cell.z / 2],
-    [cell.z, w, cell.x / 2, 0, true],
-    [cell.z, w, -cell.x / 2, 0, true],
+    [cell.x, 0, cell.z / 2],
+    [cell.x, 0, -cell.z / 2],
+    [cell.z, cell.x / 2, 0, true],
+    [cell.z, -cell.x / 2, 0, true],
   ];
-  for (const [len, width, x, z, rot] of pieces) {
+  for (const [len, x, z, rot] of pieces) {
     const t = tape.clone();
     t.repeat.set(len / 0.2, 1);
     t.needsUpdate = true;
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(len, width), mat.clone());
-    m.material.map = t;
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(len, w), new THREE.MeshStandardMaterial({ map: t, roughness: 0.6 }));
     m.rotation.x = -Math.PI / 2;
     if (rot) m.rotation.z = Math.PI / 2;
     m.position.set(x, 0.002, z);
     m.receiveShadow = true;
-    scene.add(m);
+    group.add(m);
   }
+  scene.add(group);
+  return group;
 }
 
 function stripeTexture() {

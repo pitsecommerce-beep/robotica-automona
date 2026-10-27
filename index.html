@@ -26,11 +26,12 @@
           <span>Escenario</span>
           <select id="scenario-select">
             <option value="lab">Celda vacía</option>
-            <option value="sorting" disabled>Clasificación en línea (próximamente)</option>
-            <option value="pallet" disabled>Despaletizado (próximamente)</option>
+            <option value="sorting">Clasificación en línea · YuMi</option>
+            <option value="pallet">Despaletizado · IRB 660</option>
           </select>
         </label>
       </div>
+      <button class="btn primary present-btn" id="btn-present">▶ Presentación</button>
       <div class="status" id="status"><span class="dot"></span><span id="status-text">Cargando…</span></div>
     </header>
 
@@ -44,30 +45,55 @@
           <button class="chip" id="btn-stop">Parar</button>
         </div>
         <div class="loading" id="loading">Cargando modelo CAD…</div>
+
+        <div class="presentation" id="presentation">
+          <div class="pres-caption" id="pres-caption"></div>
+          <div class="pres-stats" id="pres-stats"></div>
+          <div class="pres-subtitle" id="pres-subtitle"></div>
+          <div class="pres-controls">
+            <button class="mic-round" id="pres-mic" title="Mantener para hablar">🎙</button>
+            <button class="chip" id="pres-exit">Salir · Esc</button>
+          </div>
+        </div>
       </section>
 
       <aside class="panel">
         <div class="panel-section">
+          <div class="panel-head">
+            <h2>Conversación</h2>
+            <span class="tag" id="voice-engines">…</span>
+          </div>
+          <button class="btn mic" id="mic">● Mantener para hablar <kbd>Espacio</kbd></button>
+          <form class="say" id="say-form">
+            <input id="say-input" placeholder="O escribe una orden: «mete rojos y azules en el cajón A»" autocomplete="off" />
+            <button class="btn" type="submit">Enviar</button>
+          </form>
+          <div class="chat" id="chat"></div>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-head">
+            <h2>Escenario</h2>
+            <span class="tag muted" id="scenario-state">Parado</span>
+          </div>
+          <div id="scenario-panel"><p class="hint">Elige un escenario arriba para cargar la celda.</p></div>
+        </div>
+
+        <div class="panel-section">
           <div class="btn-row">
-            <button class="btn primary" id="btn-home">Ir a Home</button>
+            <button class="btn" id="btn-home">Ir a Home</button>
             <button class="btn" id="btn-zero">Ejes a 0</button>
             <button class="btn" id="btn-demo">Demo</button>
           </div>
         </div>
 
-        <div class="panel-section">
-          <div class="panel-head">
-            <h2>Movimiento manual</h2>
-            <span class="tag">Articular</span>
-          </div>
+        <details class="panel-section" open>
+          <summary><h2>Movimiento manual</h2><span class="tag">Articular</span></summary>
           <div id="joints"></div>
-        </div>
+        </details>
 
-        <div class="panel-section">
-          <div class="panel-head">
-            <h2>Movimiento cartesiano</h2>
-            <span class="tag">Base · mm</span>
-          </div>
+        <details class="panel-section">
+          <summary><h2>Movimiento cartesiano</h2><span class="tag">Base · mm</span></summary>
           <div class="cart-grid">
             <label>X<input id="cart-x" type="number" step="1" /></label>
             <label>Y<input id="cart-y" type="number" step="1" /></label>
@@ -103,7 +129,7 @@
             </select>
           </div>
           <p class="hint">Activa «Ir a clic» y haz clic sobre la mesa para que el robot se aproxime al punto.</p>
-        </div>
+        </details>
 
         <div class="panel-section">
           <div class="panel-head"><h2>Velocidad</h2><span class="mono" id="override-val">100 %</span></div>
@@ -123,11 +149,6 @@
           <div class="tcp" id="tcp"></div>
         </div>
 
-        <div class="panel-section voice">
-          <div class="panel-head"><h2>Órdenes por voz</h2><span class="tag muted">Paso 4</span></div>
-          <button class="btn mic" disabled>● Mantener para hablar</button>
-          <p class="hint">Conversación con Deepgram (voz) y Claude (razonamiento). Sin claves configuradas, el robot responde con pitidos.</p>
-        </div>
       </aside>
     </main>
 

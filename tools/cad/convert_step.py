@@ -196,6 +196,34 @@ def material(spec):
 
 # ---------------------------------------------------------------- main
 
+UP_AXES = {
+    "Y": np.eye(3),
+    # CAD con Z arriba (Robcad, la mayoría de robots industriales) → Y arriba: (x, y, z) → (x, z, -y).
+    "Z": np.array([[1, 0, 0], [0, 0, 1], [0, -1, 0]], float),
+}
+
+
+def r6(v):
+    return [round(float(x), 6) + 0.0 for x in v]
+
+
+def load_parts(cfg, base_dir):
+    """{nodo: [pieza]} a partir de un STEP de ensamblaje o de un STEP por pieza."""
+    if "arm_step" in cfg:
+        print("Leyendo brazo...")
+        arm = read_step(os.path.join(base_dir, cfg["arm_step"]))
+        missing = [l for l in cfg["links"] if l not in arm]
+        if missing:
+            sys.exit(f"Faltan piezas en el STEP: {missing}. Disponibles: {list(arm)}")
+        return {node: [arm[l]] for l, node in zip(cfg["links"], cfg["node_names"])}
+    out = {}
+    for node, files in cfg["part_files"].items():
+        for f in files:
+            print(f"Leyendo {f}...")
+            out.setdefault(node, []).extend(read_step(os.path.join(base_dir, f)).values())
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", required=True)
@@ -205,77 +233,89 @@ def main():
     base_dir = os.path.dirname(os.path.abspath(args.config))
     os.makedirs(args.out, exist_ok=True)
 
-    print("Leyendo brazo...")
-    arm = read_step(os.path.join(base_dir, cfg["arm_step"]))
-    links = cfg["links"]  # base primero
-    missing = [l for l in links if l not in arm]
-    if missing:
-        sys.exit(f"Faltan piezas en el STEP: {missing}. Disponibles: {list(arm)}")
+    parts = load_parts(cfg, base_dir)
+    up = UP_AXES[cfg.get("up_axis", "Y")]
 
-    # Marco de salida: origen en el centro de la base apoyada en el suelo, metros, Y arriba.
-    offset = np.array(cfg.get("origin_offset_mm", [0, 0, 0]), float)
-    base_min_y = arm[links[0]]["V"][:, 1].min()
-    shift = np.array([offset[0], -base_min_y, offset[2]])
+    # Marco de salida: metros, Y arriba, origen en el eje 1 a la altura del apoyo de la base.
+    base_V = np.vstack([p["V"] for p in parts["base"]]) @ up.T
+    shift = np.array([0.0, -base_V[:, 1].min(), 0.0])
     to_m = np.eye(4)
-    to_m[:3, :3] *= 0.001
+    to_m[:3, :3] = up * 0.001
     to_m[:3, 3] = shift * 0.001
+    point = lambda p_mm: (up @ np.asarray(p_mm, float) + shift) * 0.001
+    direction = lambda d: (up @ np.asarray(d, float)) / np.linalg.norm(d)
 
-    joints = []
-    for i, (a, b) in enumerate(zip(links, links[1:])):
-        p, d = find_axis(arm[a], arm[b])
-        if i == 0:
-            d = d if d[1] >= 0 else -d
-        joints.append(dict(
-            name=cfg["joint_names"][i],
-            parent=cfg["node_names"][i],
-            child=cfg["node_names"][i + 1],
-            origin=[round(float(x), 6) for x in (p + shift) * 0.001],
-            axis=[round(float(x), 6) + 0.0 for x in d],
-        ))
-        print(f"  {joints[-1]['name']}: origen {joints[-1]['origin']} eje {joints[-1]['axis']}")
+    links = []
+    if "mechanism" in cfg:
+        # Mecanismo explícito (p. ej. tomado de Robcad), con bielas y cierres de lazo.
+        for l in cfg["mechanism"]:
+            link = dict(name=l["name"], parent=l["parent"], type=l.get("type", "rot"),
+                        origin=r6(point(l["origin_mm"])), axis=r6(direction(l["axis"])), drive=dict(l["drive"]))
+            if "aim" in link["drive"]:
+                aim = dict(link["drive"]["aim"])
+                aim["target"] = r6(point(aim.pop("target_mm")))
+                link["drive"]["aim"] = aim
+            links.append(link)
+    else:
+        # Cadena serie: ejes detectados en el CAD.
+        nodes = cfg["node_names"]
+        for i, (a, b) in enumerate(zip(nodes, nodes[1:])):
+            p, d = find_axis(parts[a][0], parts[b][0])
+            if i == 0 and (up @ d)[1] < 0:
+                d = -d
+            name = cfg["joint_names"][i]
+            links.append(dict(name=b, parent=a, type="rot", origin=r6(point(p)), axis=r6(direction(d)), drive={"q": {name: 1}}))
+    for l in links:
+        print(f"  {l['name']:6} ← {l['parent']:6} {l['type']} origen {l['origin']} eje {l['axis']} {l['drive']}")
 
     palette = {k: material(v) for k, v in cfg["palette"].items()}
     scene = trimesh.Scene()
     stats = {}
-    for link, node in zip(links, cfg["node_names"]):
-        for j, (mat, m) in enumerate(build_meshes(arm[link], palette, to_m, cfg["simplify_ratio"])):
-            m.visual = trimesh.visual.TextureVisuals(material=mat)
-            scene.add_geometry(m, node_name=f"{node}__{j}", geom_name=f"{node}__{j}")
-            stats[node] = stats.get(node, 0) + len(m.faces)
 
-    # Herramienta (pinza): cada pieza en su propio STEP, en el marco de la brida.
-    tool = cfg.get("tool")
-    tool_info = None
-    if tool:
-        flange = np.array(tool["flange_point_mm"], float)  # en coordenadas del CAD del brazo
-        R = np.array(tool["rotation"], float)  # columnas: ejes x,y,z de la pinza en el CAD del brazo
+    def add(node, mat, m, tag):
+        m.visual = trimesh.visual.TextureVisuals(material=mat)
+        nm = f"{node}__{tag}"
+        scene.add_geometry(m, node_name=nm, geom_name=nm)
+        stats[node] = stats.get(node, 0) + len(m.faces)
+
+    for node, plist in parts.items():
+        for k, part in enumerate(plist):
+            for j, (mat, m) in enumerate(build_meshes(part, palette, to_m, cfg["simplify_ratio"])):
+                add(node, mat, m, f"{k}_{j}")
+
+    # Herramienta.
+    tool = cfg["tool"]
+    if "pieces" in tool:
+        # Pinza con su propio CAD, montada en la brida.
         T = np.eye(4)
-        T[:3, :3] = R
-        T[:3, 3] = flange
+        T[:3, :3] = np.array(tool["rotation"], float)  # columnas: ejes x,y,z de la pinza en el CAD del brazo
+        T[:3, 3] = tool["flange_point_mm"]
         T = to_m @ T
         tool_pal = {k: material(v) for k, v in tool["palette"].items()}
         for piece in tool["pieces"]:
             print(f"Leyendo {piece['file']}...")
-            parts = read_step(os.path.join(base_dir, piece["file"]))
-            for part in parts.values():
+            for part in read_step(os.path.join(base_dir, piece["file"])).values():
                 part["C"][:] = 0.85  # el CAD de la pinza no trae colores
                 for j, (_, m) in enumerate(build_meshes(part, {"default": None}, T, cfg["simplify_ratio"])):
-                    m.visual = trimesh.visual.TextureVisuals(material=tool_pal[piece["material"]])
-                    nm = f"{piece['node']}__{piece['file'][-12:-5]}{j}"
-                    scene.add_geometry(m, node_name=nm, geom_name=nm)
-                    stats[piece["node"]] = stats.get(piece["node"], 0) + len(m.faces)
-        tcp = T @ np.array([0, 0, tool["tcp_z_mm"], 1.0])
-        tool_info = dict(
-            flange_origin=[round(float(x), 6) for x in (T @ np.array([0, 0, 0, 1.0]))[:3]],
-            tcp=[round(float(x), 6) for x in tcp[:3]],
-            approach_axis=[round(float(x), 6) for x in T[:3, 2] / np.linalg.norm(T[:3, 2])],
-            finger_axis=[round(float(x), 6) for x in T[:3, 1] / np.linalg.norm(T[:3, 1])],
-        )
+                    add(piece["node"], tool_pal[piece["material"]], m, f"{piece['file'][-12:-5]}{j}")
+        tcp = (T @ np.array([0, 0, tool["tcp_z_mm"], 1.0]))[:3]
+        approach, fingers = T[:3, 2], T[:3, 1]
+    else:
+        # Brida desnuda: el TCP es el centro de la brida.
+        tcp = point(tool["tcp_mm"])
+        approach, fingers = direction(tool["approach"]), direction(tool["finger"])
+    tool_info = dict(
+        link=tool["link"],
+        tcp=r6(tcp),
+        approach_axis=r6(approach / np.linalg.norm(approach)),
+        finger_axis=r6(fingers / np.linalg.norm(fingers)),
+        fingers=tool.get("fingers", []),
+    )
 
     glb = os.path.join(args.out, "model.glb")
     scene.export(glb)
-    kin = dict(source=os.path.basename(cfg["arm_step"]), units="m", up="Y",
-               joints=joints, tool=tool_info, triangles=stats)
+    kin = dict(units="m", up="Y", actuated=cfg.get("actuated", cfg.get("joint_names")),
+               links=links, tool=tool_info, triangles=stats)
     json.dump(kin, open(os.path.join(args.out, "kinematics.json"), "w"), indent=2)
     print("Triángulos:", stats, "total", sum(stats.values()))
     print(f"Escrito {glb} ({os.path.getsize(glb) / 1e6:.1f} MB)")

@@ -28,6 +28,7 @@ export class Robot {
   constructor(spec, kinJson, gltfScene) {
     this.spec = spec;
     this.kin = new Kinematics(kinJson, spec);
+    this.kinJson = kinJson;
     this.root = new THREE.Group();
     this.root.name = spec.id;
     this.speedOverride = 1;
@@ -56,33 +57,41 @@ export class Robot {
       return g;
     };
 
-    attach('base', this.root, new THREE.Vector3());
-    this.joints = [];
-    let parent = this.root;
-    let prevOrigin = new THREE.Vector3();
-    for (const [i, j] of kinJson.joints.entries()) {
-      const k = this.kin.joints[i];
+    // Eslabones del mecanismo: cada uno cuelga de un pivote situado en su articulación.
+    // Las mallas están en coordenadas de la pose cero, así que se desplazan por -origen.
+    const nodes = { base: { pivot: this.root, link: attach('base', this.root, new THREE.Vector3()), origin: new THREE.Vector3() } };
+    this.links = kinJson.links.map((l) => {
+      const parent = nodes[l.parent];
+      const origin = new THREE.Vector3(...l.origin);
       const pivot = new THREE.Group();
-      pivot.name = j.name;
-      pivot.position.copy(k.origin).sub(prevOrigin);
-      parent.add(pivot);
-      const link = attach(j.child, pivot, k.origin.clone().negate());
-      this.joints.push({ ...k, label: spec.joints[j.name].label, pivot, link, q: 0 });
-      parent = pivot;
-      prevOrigin = k.origin;
-    }
-
-    // Herramienta: cuelga del último eslabón; los dedos se desplazan sobre su eje.
-    const flangeLink = this.joints.at(-1).link;
-    this.fingers = [];
-    if (kinJson.tool) {
-      attach('gripper', flangeLink, new THREE.Vector3());
-      const axis = new THREE.Vector3(...kinJson.tool.finger_axis);
-      for (const [node, sign] of [['finger_l', -1], ['finger_r', 1]]) {
-        const g = attach(node, flangeLink, new THREE.Vector3());
-        this.fingers.push({ group: g, dir: axis.clone().multiplyScalar(sign) });
+      pivot.name = `${l.name}_joint`;
+      pivot.position.copy(origin).sub(parent.origin);
+      parent.pivot.add(pivot);
+      const link = attach(l.name, pivot, origin.clone().negate());
+      const entry = { ...l, origin, axis: new THREE.Vector3(...l.axis).normalize(), pivot, link, value: 0 };
+      if (l.drive.q) entry.coeff = Object.entries(l.drive.q).map(([name, c]) => [kinJson.actuated.indexOf(name), c]);
+      if (l.drive.aim) {
+        entry.aimTarget = new THREE.Vector3(...l.drive.aim.target);
+        entry.aimHome = entry.aimTarget.clone().sub(origin);
       }
-    }
+      nodes[l.name] = { pivot, link, origin, entry };
+      return entry;
+    });
+    this.nodes = nodes;
+
+    // Ejes motorizados (los del FlexPendant).
+    this.joints = this.kin.joints.map((k) => ({ ...k, label: spec.joints[k.name].label, q: 0 }));
+
+    // Herramienta: cuelga del eslabón de la brida; los dedos se desplazan sobre su eje.
+    const tool = kinJson.tool;
+    const flangeLink = nodes[tool.link].link;
+    attach('gripper', flangeLink, new THREE.Vector3());
+    const fingerAxis = new THREE.Vector3(...tool.finger_axis);
+    this.fingers = (tool.fingers ?? []).map(([node, sign]) => ({
+      group: attach(node, flangeLink, new THREE.Vector3()),
+      dir: fingerAxis.clone().multiplyScalar(sign),
+    }));
+    this._pose();
     this.gripper = { opening: 0, target: 0, stroke: spec.gripper?.finger_stroke_m ?? 0, speed: spec.gripper?.finger_speed_mps ?? 0.025 };
 
     this.move = null; // movimiento activo: articular ('joint') o trayectoria muestreada ('path')
@@ -109,6 +118,7 @@ export class Robot {
   /** Coloca el robot instantáneamente (sin dinámica). */
   setJointsDeg(values) {
     values.forEach((v, i) => this._apply(i, v * DEG));
+    this._pose();
     this.jogTarget = this.q;
     this.move = null;
   }
@@ -122,6 +132,22 @@ export class Robot {
   jogDeg(i, v) {
     this._cancel();
     this.jogTarget[i] = this.clampDeg(i, v) * DEG;
+    this.kin.clamp(this.jogTarget);
+  }
+
+  /** Pose actual del TCP en coordenadas de mundo (para mover objetos sujetos). */
+  getTcpWorld() {
+    const { position, quaternion } = this.getTcpPose();
+    this.root.updateMatrixWorld();
+    return {
+      position: position.applyMatrix4(this.root.matrixWorld),
+      quaternion: this.root.getWorldQuaternion(new THREE.Quaternion()).multiply(quaternion),
+    };
+  }
+
+  /** Eslabón al que se pueden colgar herramientas (la brida). */
+  get flange() {
+    return this.nodes[this.kinJson.tool.link].link;
   }
 
   /** Pose actual del TCP en el marco de la base. */
@@ -136,7 +162,7 @@ export class Robot {
    * Devuelve una promesa que se resuelve al llegar.
    */
   moveJ(targetDeg) {
-    return this._moveJRad(targetDeg.map((v, i) => this.clampDeg(i, v) * DEG));
+    return this._moveJRad(this.kin.clamp(targetDeg.map((v) => v * DEG)));
   }
 
   goHome() {
@@ -155,8 +181,10 @@ export class Robot {
    * MoveL: el TCP sigue una recta (y la orientación una interpolación esférica) con perfil
    * trapezoidal. Si algún eje superara su velocidad máxima, se alarga la duración.
    */
-  async moveL(pose, speed = 0.25) {
+  async moveL(pose, speed = 0.25, { fallbackToJoint = false } = {}) {
     const plan = this.planLinear(pose, speed);
+    // En ciclos automáticos, si la recta cruza una singularidad o un tope, se llega en articular.
+    if (!plan.ok && fallbackToJoint) return this.moveJTo(pose);
     if (!plan.ok) return plan;
     await this._play(plan.path, PATH_DT);
     return { ok: true, duration: plan.duration };
@@ -171,7 +199,7 @@ export class Robot {
     if (cruise === 0) return { ok: true, path: [this.q], duration: 0 };
 
     // Hasta 3 intentos: si la articulación más exigida supera su límite, se estira el tiempo.
-    for (let attempt = 0; attempt < 3; attempt++) {
+    for (let attempt = 0; attempt < 5; attempt++) {
       const ta = Math.min(ACCEL_TIME, cruise);
       const T = cruise + ta;
       const steps = Math.max(1, Math.ceil(T / PATH_DT));
@@ -202,6 +230,19 @@ export class Robot {
   /** 0 = cerrada, 1 = abierta del todo. */
   setGripper(opening) {
     this.gripper.target = THREE.MathUtils.clamp(opening, 0, 1);
+  }
+
+  /** Mueve los dedos y espera a que lleguen (la pinza tiene su propia velocidad). */
+  gripTo(opening) {
+    this.setGripper(opening);
+    return new Promise((resolve) => {
+      const off = this.onUpdate(() => {
+        if (Math.abs(this.gripper.opening - this.gripper.target) < 1e-4 || !this.gripper.stroke) {
+          off();
+          resolve();
+        }
+      });
+    });
   }
 
   /** Detiene el movimiento en curso (la promesa pendiente se resuelve). */
@@ -240,6 +281,7 @@ export class Robot {
       g.opening += THREE.MathUtils.clamp(g.target - g.opening, -step, step);
       for (const f of this.fingers) f.group.position.copy(f.dir).multiplyScalar(g.opening * g.stroke);
     }
+    if (this._dirty) this._pose();
     this.listeners.forEach((fn) => fn(this));
   }
 
@@ -289,7 +331,34 @@ export class Robot {
   _apply(i, q) {
     const j = this.joints[i];
     j.q = THREE.MathUtils.clamp(q, j.min, j.max);
-    j.pivot.quaternion.setFromAxisAngle(j.axis, j.q);
+    this._dirty = true;
+  }
+
+  /** Coloca todos los eslabones a partir de q: articulaciones acopladas, bielas y cilindros. */
+  _pose() {
+    this._dirty = false;
+    const q = this.q;
+    for (const l of this.links) {
+      const d = l.drive;
+      if (d.q) {
+        l.value = l.coeff.reduce((s, [i, c]) => s + c * q[i], 0);
+      } else if (d.aim) {
+        // Gira para apuntar a un punto de otro eslabón (p. ej. el cilindro compensador).
+        const target = this.nodes[d.aim.target_link].link.localToWorld(l.aimTarget.clone());
+        const parentPivot = l.pivot.parent;
+        parentPivot.updateMatrixWorld(true);
+        const local = parentPivot.worldToLocal(target).sub(l.pivot.position);
+        l.length = local.length();
+        l.value = signedAngle(l.aimHome, local, l.axis);
+      } else if (d.stretch) {
+        // Vástago que se extiende lo que haya cambiado la distancia del eslabón al que apunta.
+        const of = this.links.find((o) => o.name === d.stretch.of);
+        l.value = of.length - of.aimHome.length();
+      }
+      if (l.type === 'prism') l.pivot.position.copy(l.origin).sub(this.nodes[l.parent].origin).addScaledVector(l.axis, l.value);
+      else l.pivot.quaternion.setFromAxisAngle(l.axis, l.value);
+      l.pivot.updateMatrixWorld(true);
+    }
   }
 }
 
@@ -304,4 +373,11 @@ function trapezoid(t, T, ta) {
     return 1 - (0.5 * v * r * r) / ta;
   }
   return v * (t - ta / 2);
+}
+
+/** Ángulo con signo de a a b alrededor de axis (vectores en el mismo marco). */
+function signedAngle(a, b, axis) {
+  const pa = a.clone().projectOnPlane(axis);
+  const pb = b.clone().projectOnPlane(axis);
+  return Math.atan2(pa.clone().cross(pb).dot(axis), pa.dot(pb));
 }
