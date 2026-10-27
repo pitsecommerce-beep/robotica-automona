@@ -8,15 +8,35 @@ Simulador web de robótica autónoma con robots ABB modelados desde su CAD ofici
 |---|---|---|
 | 1 | CAD → GLB, laboratorio 3D, robot articulado con límites reales | Hecho |
 | 2 | Cinemática inversa (7 ejes), MoveJ/MoveL y jog cartesiano | Hecho |
-| 3 | Escenario de clasificación en línea con física (Rapier) | Pendiente |
-| 4 | Conversación por voz (Deepgram) y cerebro (Claude) con gestos; pitidos si no hay claves | Pendiente |
-| 5 | Escenario de despaletizado y selector de robots | Pendiente |
+| 3 | Escenarios con física (Rapier): clasificación en línea (YuMi) y despaletizado (IRB 660) | Hecho |
+| 4 | Conversación por voz (Deepgram) y cerebro (Claude) con gestos; pitidos si no hay claves | Hecho |
+| 5 | Segundo robot (IRB 660 con paralelogramo), selector de robots y modo presentación | Hecho |
+
+## Robots
+
+| Robot | Ejes | Carga | Alcance | Escenario |
+|---|---|---|---|---|
+| ABB YuMi IRB 14050 | 7 | 0,5 kg | 559 mm | Clasificación de paquetes en cinta |
+| ABB IRB 660-180/3.15 | 4 (paralelogramo) | 180 kg | 3150 mm | Despaletizado por color o SKU |
+
+La cinemática del IRB 660 (ejes acoplados, bielas y cilindro compensador) sale del mecanismo Robcad de ABB y se valida en `test/irb660.test.js` contra la tabla de posiciones de la especificación.
+
+## Voz y cerebro
+
+- **Oído:** Deepgram en vivo por WebSocket (`/api/listen`), con texto parcial mientras se habla. Sin Deepgram, el reconocimiento del navegador. También se puede escribir.
+- **Cerebro:** las órdenes claras («inicia», «para», «mete rojos y azules en el cajón A», «clasifica por SKU») las resuelve al instante un intérprete local. La charla y las órdenes complejas van a Claude con el estado de la celda y vuelven como `{ reply, emotion, actions }`.
+- **Voz:** pitidos estilo droide según la emoción y, con Deepgram, voz Aura en streaming.
+- **Gestos:** cada emoción tiene un gesto físico (celebrar, asentir, negar, saludar…) ejecutado con los límites reales del robot.
+- **Latencia:** transcripción en streaming, vía rápida local, respuesta de Claude con esfuerzo bajo y voz que empieza a sonar con los primeros bytes.
+
+Atajo: mantener la barra espaciadora para hablar. El botón **Presentación** pone el laboratorio a pantalla completa con cámara cinematográfica y subtítulos.
 
 ## Desarrollo
 
 ```bash
 npm install
-npm run dev        # Vite en http://localhost:5173
+npm start          # servidor Express (APIs) en :3000
+npm run dev        # Vite en http://localhost:5173 (redirige /api al :3000)
 npm run preview    # build de producción + servidor Express
 npm test           # pruebas de cinemática y trayectorias
 ```
@@ -31,7 +51,7 @@ npm test           # pruebas de cinemática y trayectorias
 ## Despliegue en Railway
 
 Railway usa `railway.json`: compila con Vite y arranca `server/index.js`, que sirve el front y las rutas `/api/*`.
-Variables de entorno (ver `.env.example`): `ANTHROPIC_API_KEY`, `DEEPGRAM_API_KEY`. Son opcionales: sin ellas el robot responde con pitidos.
+Variables de entorno (ver `.env.example`): `ANTHROPIC_API_KEY`, `DEEPGRAM_API_KEY`. Son opcionales: sin ellas el robot entiende las órdenes básicas en local y responde con pitidos.
 
 ## Añadir un robot
 

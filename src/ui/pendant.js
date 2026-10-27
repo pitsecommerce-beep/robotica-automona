@@ -77,9 +77,11 @@ export function createPendant(robot, { onStatus }) {
 
   const tcpEl = document.getElementById('tcp');
   const gripVal = document.getElementById('grip-val');
-  let frame = 0;
+  let last = 0;
   robot.onUpdate(() => {
-    if (frame++ % 3) return; // refrescar el panel a ~20 Hz basta
+    const now = performance.now();
+    if (now - last < 50) return; // refrescar el panel a ~20 Hz basta
+    last = now;
     robot.getJointsDeg().forEach((v, i) => {
       rows[i].val.textContent = `${v.toFixed(1)}°`;
       if (document.activeElement !== rows[i].input) rows[i].input.value = v;

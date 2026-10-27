@@ -16,19 +16,57 @@
     "estop_tcp_acceleration_mps2": 85.4,
     "accel_time_0_1_s": 0.12,
     "pose_repeatability_mm": 0.02,
-    "footprint_mm": [160, 160],
+    "footprint_mm": [
+      160,
+      160
+    ],
     "mounting": "Cualquier ángulo",
     "controller": "OmniCore C30",
     "air_supply_bar": 4
   },
   "joints": {
-    "axis1": { "label": "Eje 1 · rotación", "min_deg": -168.5, "max_deg": 168.5, "max_speed_dps": 180 },
-    "axis2": { "label": "Eje 2 · brazo",    "min_deg": -143.5, "max_deg": 43.5,  "max_speed_dps": 180 },
-    "axis7": { "label": "Eje 7 · rotación", "min_deg": -168.5, "max_deg": 168.5, "max_speed_dps": 180 },
-    "axis3": { "label": "Eje 3 · brazo",    "min_deg": -123.5, "max_deg": 80.0,  "max_speed_dps": 180 },
-    "axis4": { "label": "Eje 4 · muñeca",   "min_deg": -290.0, "max_deg": 290.0, "max_speed_dps": 400 },
-    "axis5": { "label": "Eje 5 · flexión",  "min_deg": -88.0,  "max_deg": 138.0, "max_speed_dps": 400 },
-    "axis6": { "label": "Eje 6 · giro",     "min_deg": -229.0, "max_deg": 229.0, "max_speed_dps": 400 }
+    "axis1": {
+      "label": "Eje 1 · rotación",
+      "min_deg": -168.5,
+      "max_deg": 168.5,
+      "max_speed_dps": 180
+    },
+    "axis2": {
+      "label": "Eje 2 · brazo",
+      "min_deg": -143.5,
+      "max_deg": 43.5,
+      "max_speed_dps": 180
+    },
+    "axis7": {
+      "label": "Eje 7 · rotación",
+      "min_deg": -168.5,
+      "max_deg": 168.5,
+      "max_speed_dps": 180
+    },
+    "axis3": {
+      "label": "Eje 3 · brazo",
+      "min_deg": -123.5,
+      "max_deg": 80.0,
+      "max_speed_dps": 180
+    },
+    "axis4": {
+      "label": "Eje 4 · muñeca",
+      "min_deg": -290.0,
+      "max_deg": 290.0,
+      "max_speed_dps": 400
+    },
+    "axis5": {
+      "label": "Eje 5 · flexión",
+      "min_deg": -88.0,
+      "max_deg": 138.0,
+      "max_speed_dps": 400
+    },
+    "axis6": {
+      "label": "Eje 6 · giro",
+      "min_deg": -229.0,
+      "max_deg": 229.0,
+      "max_speed_dps": 400
+    }
   },
   "calibration_note": "El cero de cada eje es la pose del CAD (brazo vertical, antebrazo horizontal). Sentido positivo según la regla de la mano derecha sobre el eje detectado. Pendiente de validar contra RobotStudio.",
   "gripper": {
@@ -38,5 +76,37 @@
     "finger_speed_mps": 0.025,
     "vacuum": true
   },
-  "home_deg": { "axis1": 0, "axis2": -30, "axis7": 0, "axis3": -40, "axis4": 0, "axis5": 70, "axis6": 0 }
+  "home_deg": {
+    "axis1": 0,
+    "axis2": -30,
+    "axis7": 0,
+    "axis3": -40,
+    "axis4": 0,
+    "axis5": 70,
+    "axis6": 0
+  },
+  "mount": "table",
+  "view": {
+    "camera": [
+      0.95,
+      1.3,
+      1.05
+    ],
+    "target": [
+      0.05,
+      1.03,
+      0
+    ],
+    "axis_helper_m": 0.09
+  },
+  "gestures": {
+    "axes": {
+      "yaw": "axis1",
+      "lift": "axis2",
+      "elbow": "axis3",
+      "pitch": "axis5",
+      "roll": "axis6"
+    },
+    "scale": 1.0
+  }
 }

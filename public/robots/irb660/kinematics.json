@@ -1,0 +1,294 @@
+{
+  "units": "m",
+  "up": "Y",
+  "actuated": [
+    "axis1",
+    "axis2",
+    "axis3",
+    "axis6"
+  ],
+  "links": [
+    {
+      "name": "link1",
+      "parent": "base",
+      "type": "rot",
+      "origin": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "axis": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "drive": {
+        "q": {
+          "axis1": 1
+        }
+      }
+    },
+    {
+      "name": "link2",
+      "parent": "link1",
+      "type": "rot",
+      "origin": [
+        0.3,
+        0.8,
+        0.0
+      ],
+      "axis": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "drive": {
+        "q": {
+          "axis2": 1
+        }
+      }
+    },
+    {
+      "name": "link3",
+      "parent": "link2",
+      "type": "rot",
+      "origin": [
+        0.3,
+        2.08,
+        0.0
+      ],
+      "axis": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "drive": {
+        "q": {
+          "axis3": 1,
+          "axis2": -1
+        }
+      }
+    },
+    {
+      "name": "link5",
+      "parent": "link3",
+      "type": "rot",
+      "origin": [
+        1.65,
+        2.08,
+        0.0
+      ],
+      "axis": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "drive": {
+        "q": {
+          "axis3": -1
+        }
+      }
+    },
+    {
+      "name": "link6",
+      "parent": "link5",
+      "type": "rot",
+      "origin": [
+        1.91,
+        2.08,
+        0.0
+      ],
+      "axis": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "drive": {
+        "q": {
+          "axis6": 1
+        }
+      }
+    },
+    {
+      "name": "plate",
+      "parent": "link3",
+      "type": "rot",
+      "origin": [
+        0.3,
+        2.08,
+        0.0
+      ],
+      "axis": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "drive": {
+        "q": {
+          "axis3": -1
+        }
+      }
+    },
+    {
+      "name": "rod_h",
+      "parent": "plate",
+      "type": "rot",
+      "origin": [
+        0.64472,
+        2.369254,
+        0.0
+      ],
+      "axis": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "drive": {
+        "q": {
+          "axis3": 1
+        }
+      }
+    },
+    {
+      "name": "rod_v",
+      "parent": "link1",
+      "type": "rot",
+      "origin": [
+        -0.117233,
+        0.968573,
+        0.0
+      ],
+      "axis": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "drive": {
+        "q": {
+          "axis2": 1
+        }
+      }
+    },
+    {
+      "name": "crank",
+      "parent": "link2",
+      "type": "rot",
+      "origin": [
+        0.3,
+        0.8,
+        0.0
+      ],
+      "axis": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "drive": {
+        "q": {
+          "axis3": 1,
+          "axis2": -1
+        }
+      }
+    },
+    {
+      "name": "rod3",
+      "parent": "crank",
+      "type": "rot",
+      "origin": [
+        -0.2,
+        0.8,
+        0.0
+      ],
+      "axis": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "drive": {
+        "q": {
+          "axis2": 1,
+          "axis3": -1
+        }
+      }
+    },
+    {
+      "name": "bal_cyl",
+      "parent": "link1",
+      "type": "rot",
+      "origin": [
+        0.339668,
+        1.082233,
+        0.0
+      ],
+      "axis": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "drive": {
+        "aim": {
+          "target_link": "link2",
+          "target": [
+            0.3,
+            2.08,
+            0.0
+          ]
+        }
+      }
+    },
+    {
+      "name": "bal_rod",
+      "parent": "bal_cyl",
+      "type": "prism",
+      "origin": [
+        0.339668,
+        1.082233,
+        0.0
+      ],
+      "axis": [
+        -0.039725,
+        0.999211,
+        0.0
+      ],
+      "drive": {
+        "stretch": {
+          "of": "bal_cyl"
+        }
+      }
+    }
+  ],
+  "tool": {
+    "link": "link6",
+    "tcp": [
+      1.91,
+      1.833,
+      0.0
+    ],
+    "approach_axis": [
+      0.0,
+      -1.0,
+      0.0
+    ],
+    "finger_axis": [
+      0.0,
+      0.0,
+      -1.0
+    ],
+    "fingers": []
+  },
+  "triangles": {
+    "base": 9105,
+    "link1": 16936,
+    "link2": 3073,
+    "link3": 4701,
+    "link5": 4791,
+    "link6": 2516,
+    "plate": 1963,
+    "rod_h": 486,
+    "rod_v": 481,
+    "crank": 1844,
+    "rod3": 3764,
+    "bal_cyl": 1829,
+    "bal_rod": 1326
+  }
+}

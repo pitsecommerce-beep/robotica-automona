@@ -1,27 +1,40 @@
 {
-  "source": "IRB14050_SAYuMi_-_rev00.STEP",
   "units": "m",
   "up": "Y",
-  "joints": [
+  "actuated": [
+    "axis1",
+    "axis2",
+    "axis7",
+    "axis3",
+    "axis4",
+    "axis5",
+    "axis6"
+  ],
+  "links": [
     {
-      "name": "axis1",
+      "name": "link1",
       "parent": "base",
-      "child": "link1",
+      "type": "rot",
       "origin": [
         0.0,
         0.134,
-        -0.0
+        0.0
       ],
       "axis": [
         0.0,
         1.0,
         0.0
-      ]
+      ],
+      "drive": {
+        "q": {
+          "axis1": 1
+        }
+      }
     },
     {
-      "name": "axis2",
+      "name": "link2",
       "parent": "link1",
-      "child": "link2",
+      "type": "rot",
       "origin": [
         -0.03,
         0.305832,
@@ -31,12 +44,17 @@
         0.0,
         0.0,
         1.0
-      ]
+      ],
+      "drive": {
+        "q": {
+          "axis2": 1
+        }
+      }
     },
     {
-      "name": "axis7",
+      "name": "link3",
       "parent": "link2",
-      "child": "link3",
+      "type": "rot",
       "origin": [
         0.0,
         0.134,
@@ -46,12 +64,17 @@
         0.0,
         1.0,
         0.0
-      ]
+      ],
+      "drive": {
+        "q": {
+          "axis7": 1
+        }
+      }
     },
     {
-      "name": "axis3",
+      "name": "link4",
       "parent": "link3",
-      "child": "link4",
+      "type": "rot",
       "origin": [
         0.0405,
         0.557758,
@@ -61,12 +84,17 @@
         0.0,
         0.0,
         1.0
-      ]
+      ],
+      "drive": {
+        "q": {
+          "axis3": 1
+        }
+      }
     },
     {
-      "name": "axis4",
+      "name": "link5",
       "parent": "link4",
-      "child": "link5",
+      "type": "rot",
       "origin": [
         0.0,
         0.598114,
@@ -76,12 +104,17 @@
         1.0,
         0.0,
         0.0
-      ]
+      ],
+      "drive": {
+        "q": {
+          "axis4": 1
+        }
+      }
     },
     {
-      "name": "axis5",
+      "name": "link6",
       "parent": "link5",
-      "child": "link6",
+      "type": "rot",
       "origin": [
         0.305514,
         0.571008,
@@ -91,12 +124,17 @@
         0.0,
         0.0,
         1.0
-      ]
+      ],
+      "drive": {
+        "q": {
+          "axis5": 1
+        }
+      }
     },
     {
-      "name": "axis6",
+      "name": "link7",
       "parent": "link6",
-      "child": "link7",
+      "type": "rot",
       "origin": [
         0.0,
         0.598114,
@@ -106,15 +144,16 @@
         1.0,
         0.0,
         0.0
-      ]
+      ],
+      "drive": {
+        "q": {
+          "axis6": 1
+        }
+      }
     }
   ],
   "tool": {
-    "flange_origin": [
-      0.341541,
-      0.598114,
-      0.001
-    ],
+    "link": "link7",
     "tcp": [
       0.477541,
       0.598114,
@@ -129,6 +168,16 @@
       0.0,
       1.0,
       0.0
+    ],
+    "fingers": [
+      [
+        "finger_l",
+        -1
+      ],
+      [
+        "finger_r",
+        1
+      ]
     ]
   },
   "triangles": {
